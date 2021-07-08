@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.LoginMapper">
+
+<select id="login" parameterType="com.risata181.sizai.bean.TblUser" resultType="com.risata181.sizai.bean.TblUser">
+SELECT
+	*
+FROM
+	TBL_USER
+WHERE
+	USER_ID = #{userId}
+	AND USER_IS_DELETE ='N'
+</select>
+
+<select id="getAuth" parameterType="String" resultType="String">
+SELECT
+	USER_AUTH
+FROM
+	TBL_USER
+WHERE
+	USER_ID = #{string}
+</select>
+
+<select id="getSeq" parameterType="String" resultType="String">
+SELECT
+	USER_SEQ
+FROM
+	TBL_USER
+WHERE
+	USER_ID = #{string}
+</select>
+
+<select id="getName" parameterType="String" resultType="String">
+SELECT
+	USER_NAME
+FROM
+	TBL_USER
+WHERE
+	USER_ID = #{string}
+</select>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+"http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+	<definition name="base" template="/WEB-INF/views/template/template.jsp">
+		<put-attribute name="meta" value="/WEB-INF/views/template/meta.jsp"/>
+		<put-attribute name="left" value="/WEB-INF/views/template/left.jsp"/>
+		<put-attribute name="common" value="/WEB-INF/views/template/common-js.jsp"/>
+		<put-attribute name="header" value="/WEB-INF/views/template/header.jsp"/>
+		<put-attribute name="popup" value="/WEB-INF/views/template/popup.jsp"/>
+	</definition>
+	
+	<definition name="/login" template="/WEB-INF/views/login.jsp"></definition>
+	
+	<definition name="/" extends="base">
+		<put-attribute name="body" value="/WEB-INF/index.jsp"/>
+	</definition>
+
+	<definition name="*" extends="base">
+		<put-attribute name="body" value="/WEB-INF/views/{1}.jsp"/>
+		<put-attribute name="scripts" value="/WEB-INF/views/{1}-js.jsp"/>
+		<put-attribute name="modal" value="/WEB-INF/views/{1}-modal.jsp"/>
+	</definition>
+	
+	<definition name="*/*" extends="base">
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp"/>
+		<put-attribute name="scripts" value="/WEB-INF/views/{1}/{2}-js.jsp"/>
+		<put-attribute name="modal" value="/WEB-INF/views/{1}/{2}-modal.jsp"/>
+	</definition>
+	
+	<definition name="*/*/*" extends="base">
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}/{3}.jsp"/>
+		<put-attribute name="scripts" value="/WEB-INF/views/{1}/{2}/{3}-js.jsp"/>
+		<put-attribute name="modal" value="/WEB-INF/views/{1}/{2}/{3}-modal.jsp"/>
+	</definition>
+	
+	<definition name="*/*/*/*" extends="base">
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}/{3}/{4}.jsp"/>
+		<put-attribute name="scripts" value="/WEB-INF/views/{1}/{2}/{3}/{4}-js.jsp"/>
+		<put-attribute name="modal" value="/WEB-INF/views/{1}/{2}/{3}/{4}-modal.jsp"/>
+	</definition>
+</tiles-definitions>

@@ -1,0 +1,120 @@
+
+.js-datepicker-temp {
+	position: absolute;
+	width: 250px;
+	/*height: 250px;*/
+	z-index: 10000;
+	background:#565656;
+}
+.js-datepicker-temp .js-datepicker-titleArea {
+	padding:5px 0;
+	text-align : center;
+	color : #fff;
+	height: 30px;
+	line-height: 30px;
+	font-size: 18px;
+	font-weight:bold;
+	background:#7367F0;
+}
+.js-datepicker-temp .js-datepicker-monthArea {
+	overflow:hidden;
+	padding:10px;
+	background: #7367F0;
+	height : 25px;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-leftArr {
+	display: inline-block;
+	float: left;
+	color: #7367F0;
+	width: 24px;
+	height : 24px;
+	line-height : 24px;
+	font-size : 12px;
+	font-weight:bold;
+	text-align : center;
+	background-color : #fff;
+	cursor : pointer;
+	border-radius : 50%;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-monthes {
+	display: inline-block;
+	color: #fff;
+	width: calc(100% - 48px);
+	text-align: center;
+	line-height: 20px;
+	font-size: 16px;
+	vertical-align: text-top;
+	font-weight:bold;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-rightArr {
+	display: inline-block;
+	color: #7367F0;
+	float: right;
+	width: 24px;
+	height : 24px;
+	line-height : 24px;
+	font-size : 12px;
+	text-align : center;
+	font-weight:bold;
+	background-color :#fff;
+	cursor : pointer;
+	border-radius : 50%;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-select {
+	width : 50%;
+	text-align-last:center; 
+	background-color: #7367F0;
+	border: 0px;
+	color : #fff;
+	display : inline-block;
+	max-height : 140px;
+	overflow-y : auto;
+	position: absolute;
+	z-index: 10001;
+	
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-select:last-child {
+	right : 0;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-select::-webkit-scrollbar {
+	display:none;
+} 
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-select .js-datepicker-selected {
+	display : list-item;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-select li{
+	color : #fff;
+	display : none;
+	width : 100%;
+}
+.js-datepicker-temp .js-datepicker-monthArea .js-datepicker-select li.selected {
+	background-color : #000;
+}
+.js-datepicker-temp .js-datepicker-numberArea {
+	width : 100%;
+}
+.js-datepicker-temp .js-datepicker-numberArea .js-datepicker-numbers {
+	display: inline-block;
+	color: #fff;
+	margin: 0 0.14%;
+	width: 35px;
+	height: 35px;
+	text-align: center;
+	border-radius: 20%;
+	line-height: 35px;
+	cursor : pointer;
+}
+.js-datepicker-temp .js-datepicker-numberArea .js-datepicker-numbers:hover {
+	background:#3c3c3c;
+	color:#fff;
+	transition:all 0.6s;
+}
+.js-datepicker-temp .js-datepicker-numberArea .js-datepicker-numbers-red {
+	color : red;
+}
+.js-datepicker-temp .js-datepicker-numberArea .js-datepicker-numbers-dims {
+	opacity : 0.5;
+}
+.js-datepicker-temp .js-datepicker-numberArea .js-datepicker-numbers-val {
+	background-color : #7367F0;
+}

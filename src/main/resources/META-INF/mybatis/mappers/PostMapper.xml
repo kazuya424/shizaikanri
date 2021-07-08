@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.PostMapper">
+
+	<select id="getPostList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblPost">
+		SELECT
+		t1.POST_SEQ as 'POST_SEQ',
+		date_format(t1.POST_INPUT, '%Y-%m-%d') AS
+		'POST_INPUT',
+		t2.USER_NAME as 'inputUserInfo.USER_NAME',
+		t1.POST_SENDER as
+		'POST_SENDER',
+		t1.POST_COMMENT as 'POST_COMMENT',
+		t3.MANAGER_NAME as
+		'managerInfo.MANAGER_NAME',
+		t4.MANAGER_COMPANY as
+		'companyInfo.MANAGER_COMPANY',
+		t1.POST_REMARK as 'POST_REMARK',
+		t1.POST_UPD_DT as 'POST_UPD_DT'
+		FROM
+		TBL_POST t1
+		LEFT JOIN TBL_USER t2 ON
+		t2.USER_SEQ = t1.POST_INPUT_USER
+		LEFT JOIN TBL_MANAGER t3 ON
+		t3.MANAGER_SEQ = t1.POST_MANAGER
+		LEFT JOIN TBL_MANAGER t4 ON
+		t4.MANAGER_SEQ = t1.POST_COMPANY
+		WHERE
+		t1.POST_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'postInput'">
+						AND t1.POST_INPUT =
+						str_to_date(#{search.searchValue}, '%Y-%m-%d')
+					</when>
+					<when test="search.searchKey == 'postInputUser'">
+						AND t2.USER_NAME LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'postSender'">
+						AND t1.POST_SENDER LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'postCompany'">
+						AND t4.MANAGER_COMPANY LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'postManager'">
+						AND t3.MANAGER_NAME LIKE '%${search.searchValue}%'
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page}, ${listLength}
+	</select>
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblPost"
+		resultType="com.risata181.sizai.bean.TblPost">
+		SELECT *
+		FROM TBL_POST
+		WHERE POST_SEQ = #{postSeq}
+		FOR UPDATE
+	</select>
+
+	<update id="updatePost"
+		parameterType="com.risata181.sizai.bean.TblPost">
+		UPDATE TBL_POST t1
+		LEFT JOIN TBL_POST t2
+		ON t1.POST_SEQ = t2.POST_SEQ
+		SET
+		t1.POST_INPUT = #{postInput}
+		, t1.POST_INPUT_USER =	#{postInputUser}
+		, t1.POST_SENDER = #{postSender}
+		, t1.POST_COMMENT =	#{postComment}
+		, t1.POST_COMPANY = #{postCompany}
+		, t1.POST_MANAGER = #{postManager}
+		, t1.POST_REMARK = 	#{postRemark}
+		, t1.POST_UPD_ID = #{postUpdId}
+		, t1.POST_UPD_DT = 	current_timestamp()
+		WHERE
+		t1.POST_SEQ = #{postSeq}
+		AND #{postUpdDt} >=	t2.POST_UPD_DT
+	</update>
+
+	<update id="deletePost"
+		parameterType="com.risata181.sizai.bean.TblPost">
+
+		UPDATE TBL_POST t1
+		LEFT JOIN TBL_POST t2
+		ON t1.POST_SEQ =	t2.POST_SEQ
+		SET
+		t1.POST_IS_DELETE = 'Y'
+		, t1.POST_UPD_ID = #{postUpdId}
+		, t1.POST_UPD_DT = current_timestamp()
+		WHERE
+		t1.POST_SEQ = #{postSeq}
+		AND	#{postUpdDt} >= t2.POST_UPD_DT
+	</update>
+
+	<insert id ="insertPost"
+		parameterType="com.risata181.sizai.bean.TblPost">
+		INSERT INTO TBL_POST (
+			POST_INPUT,
+			POST_INPUT_USER,
+			POST_SENDER,
+			POST_COMMENT,
+			POST_COMPANY,
+			POST_MANAGER,
+			POST_REMARK,
+			POST_REG_ID,
+			POST_REG_DT,
+			POST_UPD_ID,
+			POST_UPD_DT
+		) VALUES (
+			#{postInput},
+			#{postInputUser},
+			#{postSender},
+			#{postComment},
+			#{postCompany},
+			#{postManager},
+			#{postRemark},
+			#{postRegId},
+			current_timestamp(),
+			#{postRegId},
+			current_timestamp()
+		)
+	</insert>
+</mapper>

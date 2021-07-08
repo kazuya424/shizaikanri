@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.StampInstockMapper">
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblInstock"
+		resultType="com.risata181.sizai.bean.TblInstock">
+		SELECT *
+		FROM TBL_INSTOCK
+		WHERE INSTOCK_SEQ = #{instockSeq}
+		FOR UPDATE
+	</select>
+
+	<select id="getInstockList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblInstock">
+		SELECT
+		A.INSTOCK_SEQ,
+		date_format(a.INSTOCK_DATE, '%Y-%m-%d') AS
+		'instockDate',
+		A.INSTOCK_TYPE,
+		F.USER_NAME AS
+		'handler.USER_NAME',
+		G.USER_NAME AS
+		'inputUser.USER_NAME',
+		C.STOCK_TYPE AS
+		'type.STOCK_TYPE',
+		C.STOCK_PRICE AS
+		'type.STOCK_PRICE',
+		A.INSTOCK_COUNT,
+		A.INSTOCK_COMMENT,
+		D.USER_NAME AS
+		'register.USER_NAME',
+		E.USER_NAME AS
+		'updater.USER_NAME',
+		A.INSTOCK_REG_DT,
+		A.INSTOCK_UPD_DT,
+		A.INSTOCK_IS_DELETE
+		FROM
+		TBL_INSTOCK A
+		LEFT JOIN TBL_STOCK C ON
+		A.INSTOCK_TYPE = C.STOCK_SEQ
+		LEFT JOIN TBL_USER D ON A.INSTOCK_REG_ID =
+		D.USER_SEQ
+		LEFT JOIN
+		TBL_USER E ON A.INSTOCK_UPD_ID = E.USER_SEQ
+		LEFT
+		JOIN TBL_USER F ON
+		A.INSTOCK_HANDLER = F.USER_SEQ
+		LEFT
+		JOIN TBL_USER G ON
+		A.INSTOCK_INPUTUSER = G.USER_SEQ
+		WHERE
+		A.INSTOCK_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'instockDate'">
+						AND A.INSTOCK_DATE =
+						str_to_date(#{search.searchValue}, '%Y-%m-%d')
+					</when>
+					<when test="search.searchKey == 'stockType'">
+						AND C.STOCK_TYPE LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'stockPrice'">
+						AND C.STOCK_PRICE LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'instockHandler'">
+						AND F.USER_NAME LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'instockUser'">
+						AND G.USER_NAME LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page}, ${listLength}
+	</select>
+
+	<insert id="insertInstock"
+		parameterType="com.risata181.sizai.bean.TblInstock">
+		INSERT INTO
+		tbl_instock(
+		INSTOCK_DATE,
+		INSTOCK_HANDLER,
+		INSTOCK_INPUTUSER,
+		INSTOCK_TYPE,
+		INSTOCK_COUNT,
+		INSTOCK_COMMENT,
+		INSTOCK_REG_ID,
+		INSTOCK_REG_DT,
+		INSTOCK_UPD_ID,
+		INSTOCK_UPD_DT
+		)VALUES(
+		#{instockDate},
+		#{instockHandler},
+		#{instockInputUser},
+		#{instockType},
+		#{instockCount},
+		#{instockComment},
+		#{instockRegId},
+		current_timestamp(),
+		#{instockUpdId},
+		current_timestamp()
+		)
+	</insert>
+
+	<update id="updateAddToStockByInstock"
+		parameterType="com.risata181.sizai.bean.TblInstock">
+		UPDATE
+		tbl_stock
+		SET
+		STOCK_COUNT = (SELECT
+		(STOCK.STOCK_COUNT) + #{instockCount}
+		FROM (SELECT * FROM tbl_stock
+		WHERE stock_seq = #{instockType}) AS STOCK)
+		WHERE
+		STOCK_SEQ =
+		${instockType}
+	</update>
+
+	<update id="updateStock"
+		parameterType="com.risata181.sizai.bean.TblStock">
+		UPDATE
+		TBL_STOCK
+
+		SET
+		STOCK_COUNT = #{stockCount},
+		STOCK_UPD_ID =#{stockUpdId},
+		STOCK_UPD_DT =
+		current_timestamp()
+		WHERE
+		STOCK_SEQ = #{stockSeq}
+	</update>
+
+	<select id="getOriginalStockByInstock"
+		parameterType="com.risata181.sizai.bean.TblInstock"
+		resultType="com.risata181.sizai.bean.TblStock">
+		SELECT
+		STOCK_COUNT
+		FROM
+		TBL_STOCK
+		WHERE
+		STOCK_SEQ =
+		#{instockType}
+		FOR UPDATE
+	</select>
+
+	<update id="deleteInstock"
+		parameterType="com.risata181.sizai.bean.TblInstock">
+
+		UPDATE
+		TBL_INSTOCK
+		SET
+		INSTOCK_IS_DELETE = 'Y'
+		,
+		INSTOCK_UPD_ID = #{instockUpdId}
+		, INSTOCK_UPD_DT =
+		current_timestamp()
+		WHERE
+		INSTOCK_SEQ = #{instockSeq}
+	</update>
+
+	<update id="updateInstock"
+		parameterType="com.risata181.sizai.bean.TblInstock">
+		UPDATE
+		TBL_INSTOCK
+		SET
+		INSTOCK_DATE = #{instockDate},
+		INSTOCK_HANDLER = #{instockHandler},
+		INSTOCK_INPUTUSER = #{instockInputUser},
+		INSTOCK_TYPE = #{instockType},
+		INSTOCK_COUNT =#{instockCount},
+		INSTOCK_COMMENT = #{instockComment},
+		INSTOCK_UPD_ID = #{instockUpdId},
+		INSTOCK_UPD_DT = current_timestamp()
+		WHERE
+		INSTOCK_SEQ =#{instockSeq}
+	</update>
+
+	<select id="getOriginalInstock"
+		parameterType="com.risata181.sizai.bean.TblInstock"
+		resultType="com.risata181.sizai.bean.TblInstock">
+		SELECT
+		INSTOCK_COUNT,
+		INSTOCK_TYPE
+		FROM
+		TBL_INSTOCK
+		WHERE
+		INSTOCK_SEQ = ${instockSeq}
+	</select>
+</mapper>

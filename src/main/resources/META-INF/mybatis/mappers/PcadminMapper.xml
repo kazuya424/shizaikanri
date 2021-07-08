@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.PcadminMapper">
+
+	<select id="getPcadminList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblPcadmin">
+		SELECT
+		t1.PCADMIN_SEQ,
+		t1.PCADMIN_ID,
+		t1.PCADMIN_HOLDING_COMPANY,
+		t1.PCADMIN_HOLDING_PLACE,
+		t1.PCADMIN_USE_PLACE,
+		t1.PCADMIN_OPERATION,
+		t1.PCADMIN_USER,
+		t1.PCADMIN_LAST_USER,
+		t1.PCADMIN_TYPE,
+		t1.PCADMIN_ACCOUNT_NAME,
+		t1.PCADMIN_PASSWORD,
+		t1.PCADMIN_MAKER,
+		t1.PCADMIN_MODEL,
+		t1.PCADMIN_MODEL_NUM,
+		t1.PCADMIN_ETHERNET,
+		t1.PCADMIN_WIFI_ADDRESS,
+		t1.PCADMIN_CPU,
+		t1.PCADMIN_MEMORY,
+		t1.PCADMIN_HARD_DISK,
+		t1.PCADMIN_INSTALL_MEDIA,
+		t1.PCADMIN_SECURITY_SOFT,
+		t1.PCADMIN_OFFICE,
+		t1.PCADMIN_OS,
+		t1.PCADMIN_PRODUCT_KEY,
+		t1.PCADMIN_FORM,
+		date_format(t1.PCADMIN_RET_DT, '%Y-%m-%d') AS 'pcadminRetDt',
+		date_format(t1.PCADMIN_PURCHASE_DATE, '%Y-%m-%d') AS 'pcadminPurchaseDate',
+		t1.PCADMIN_COMMENT,
+		t1.PCADMIN_REG_ID,
+		t1.PCADMIN_REG_DT,
+		t1.PCADMIN_UPD_ID,
+		t1.PCADMIN_UPD_DT,
+		t2.USER_NAME as 'inputUserInfo.USER_NAME',
+		t4.USER_NAME as 'userUpdIdInfo.USER_NAME',
+		t3.MANAGER_COMPANY as 'managerInfo.MANAGER_COMPANY'
+		FROM
+		TBL_PCADMIN t1
+		LEFT JOIN TBL_USER t2 ON
+		t2.USER_SEQ = t1.PCADMIN_REG_ID
+		LEFT JOIN TBL_MANAGER t3 ON
+		t3.MANAGER_SEQ = t1.PCADMIN_HOLDING_COMPANY
+		LEFT JOIN TBL_USER t4 ON
+		t4.USER_SEQ = t1.PCADMIN_UPD_ID
+		WHERE
+		t1.PCADMIN_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'pcadminOperation'">
+						AND t1.PCADMIN_OPERATION LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminMaker'">
+						AND t1.PCADMIN_MAKER LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminUser'">
+						AND t1.PCADMIN_USER LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminRetDt'">
+						AND t1.PCADMIN_RET_DT AND DATE_FORMAT(t1.PCADMIN_RET_DT, '%Y%m')=${search.searchValue}
+					</when>
+					<when test="search.searchKey == 'pcadminAccountName'">
+						AND t1.PCADMIN_ACCOUNT_NAME LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminCpu'">
+						AND t1.PCADMIN_CPU LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminMemory'">
+						AND t1.PCADMIN_MEMORY LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminHardDisk'">
+						AND t1.PCADMIN_HARD_DISK LIKE '%${search.searchValue}%'
+					</when>
+					<when test="search.searchKey == 'pcadminOs'">
+						AND t1.PCADMIN_OS LIKE '%${search.searchValue}%'
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page}, ${listLength}
+	</select>
+
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblPcadmin"
+		resultType="com.risata181.sizai.bean.TblPcadmin">
+		SELECT *
+		FROM TBL_PCADMIN
+		WHERE PCADMIN_SEQ = #{pcadminSeq}
+		FOR UPDATE
+	</select>
+
+	<update id="updatePcadmin"
+		parameterType="com.risata181.sizai.bean.TblPcadmin">
+		UPDATE TBL_PCADMIN
+		SET
+		PCADMIN_ID = #{pcadminId},
+		PCADMIN_HOLDING_COMPANY = #{pcadminHoldingCompany},
+		PCADMIN_HOLDING_PLACE = #{pcadminHoldingPlace},
+		PCADMIN_USE_PLACE = #{pcadminUsePlace},
+		PCADMIN_OPERATION = #{pcadminOperation},
+		PCADMIN_USER = #{pcadminUser},
+		PCADMIN_LAST_USER = #{pcadminLastUser},
+		PCADMIN_TYPE = #{pcadminType},
+		PCADMIN_ACCOUNT_NAME = #{pcadminAccountName},
+		PCADMIN_PASSWORD = #{pcadminPassword},
+		PCADMIN_MAKER = #{pcadminMaker},
+		PCADMIN_MODEL = #{pcadminModel},
+		PCADMIN_MODEL_NUM = #{pcadminModelNum},
+		PCADMIN_ETHERNET = #{pcadminEthernet},
+		PCADMIN_WIFI_ADDRESS = #{pcadminWifiAddress},
+		PCADMIN_CPU = #{pcadminCpu},
+		PCADMIN_MEMORY = #{pcadminMemory},
+		PCADMIN_HARD_DISK = #{pcadminHardDisk},
+		PCADMIN_INSTALL_MEDIA = #{pcadminInstallMedia},
+		PCADMIN_SECURITY_SOFT = #{pcadminSecuritySoft},
+		PCADMIN_OFFICE = #{pcadminOffice},
+		PCADMIN_OS = #{pcadminOs},
+		PCADMIN_PRODUCT_KEY = #{pcadminProductKey},
+		PCADMIN_FORM = #{pcadminForm},
+		PCADMIN_RET_DT = #{pcadminRetDt},
+		PCADMIN_PURCHASE_DATE = #{pcadminPurchaseDate},
+		PCADMIN_COMMENT = #{pcadminComment},
+		PCADMIN_UPD_DT = current_timestamp()
+		WHERE
+		PCADMIN_SEQ = #{pcadminSeq}
+		AND	#{pcadminUpdDt} >= PCADMIN_UPD_DT
+	</update>
+
+	<update id="deletePcadmin"
+		parameterType="com.risata181.sizai.bean.TblPcadmin">
+
+		UPDATE TBL_PCADMIN t1
+		LEFT JOIN TBL_PCADMIN t2
+		ON t1.PCADMIN_SEQ =	t2.PCADMIN_SEQ
+		SET
+		t1.PCADMIN_IS_DELETE = 'Y'
+		, t1.PCADMIN_UPD_ID = #{pcadminUpdId}
+		, t1.PCADMIN_UPD_DT = current_timestamp()
+		WHERE
+		t1.PCADMIN_SEQ = #{pcadminSeq}
+		AND	#{pcadminUpdDt} >= t2.PCADMIN_UPD_DT
+	</update>
+
+
+		<insert id ="insertPcadmin"
+		parameterType="com.risata181.sizai.bean.TblPcadmin">
+		INSERT INTO TBL_PCADMIN (
+			PCADMIN_ID,
+			PCADMIN_HOLDING_COMPANY,
+			PCADMIN_HOLDING_PLACE,
+			PCADMIN_USE_PLACE,
+			PCADMIN_OPERATION,
+			PCADMIN_USER,
+			PCADMIN_LAST_USER,
+			PCADMIN_TYPE,
+			PCADMIN_ACCOUNT_NAME,
+			PCADMIN_PASSWORD,
+			PCADMIN_MAKER,
+			PCADMIN_MODEL,
+			PCADMIN_MODEL_NUM,
+			PCADMIN_ETHERNET,
+			PCADMIN_WIFI_ADDRESS,
+			PCADMIN_CPU,
+			PCADMIN_MEMORY,
+			PCADMIN_HARD_DISK,
+			PCADMIN_INSTALL_MEDIA,
+			PCADMIN_SECURITY_SOFT,
+			PCADMIN_OFFICE,
+			PCADMIN_OS,
+			PCADMIN_PRODUCT_KEY,
+			PCADMIN_FORM,
+			PCADMIN_RET_DT,
+			PCADMIN_PURCHASE_DATE,
+			PCADMIN_REG_ID,
+			PCADMIN_REG_DT,
+			PCADMIN_UPD_ID,
+			PCADMIN_UPD_DT,
+			PCADMIN_COMMENT
+		) VALUES (
+			#{pcadminId},
+			#{pcadminHoldingCompany},
+			#{pcadminHoldingPlace},
+			#{pcadminUsePlace},
+			#{pcadminOperation},
+			#{pcadminUser},
+			#{pcadminLastUser},
+			#{pcadminType},
+			#{pcadminAccountName},
+			#{pcadminPassword},
+			#{pcadminMaker},
+			#{pcadminModel},
+			#{pcadminModelNum},
+			#{pcadminEthernet},
+			#{pcadminWifiAddress},
+			#{pcadminCpu},
+			#{pcadminMemory},
+			#{pcadminHardDisk},
+			#{pcadminInstallMedia},
+			#{pcadminSecuritySoft},
+			#{pcadminOffice},
+			#{pcadminOs},
+			#{pcadminProductKey},
+			#{pcadminForm},
+			#{pcadminRetDt},
+			#{pcadminPurchaseDate},
+			#{pcadminRegId},
+			current_timestamp(),
+			#{pcadminRegId},
+			current_timestamp(),
+			#{pcadminComment}
+		)
+	</insert>
+</mapper>

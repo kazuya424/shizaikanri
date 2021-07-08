@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="Utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.AdminManagerMapper">
+	<select id="getManagerList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblManager">
+		SELECT
+		MANAGER_SEQ,
+		MANAGER_COMPANY,
+		MANAGER_NAME,
+		MANAGER_REG_DT,
+		MANAGER_UPD_DT
+		FROM
+		TBL_MANAGER
+		WHERE
+		MANAGER_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'managerName'">
+						AND MANAGER_NAME LIKE '%${search.searchValue}%'
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page},${listLength}
+	</select>
+	<insert id="registManager"
+		parameterType="com.risata181.sizai.bean.TblManager">
+		INSERT INTO
+		TBL_MANAGER
+		(
+		MANAGER_COMPANY,
+		MANAGER_NAME,
+		MANAGER_REG_ID,
+		MANAGER_REG_DT,
+		MANAGER_UPD_ID,
+		MANAGER_UPD_DT
+		) VALUES (
+		#{managerCompany},
+		#{managerName},
+		#{managerRegId},
+		current_timestamp(),
+		#{managerUpdId},
+		current_timestamp()
+		)
+	</insert>
+	<update id="updateManager"
+		parameterType="com.risata181.sizai.bean.TblManager">
+		UPDATE TBL_MANAGER
+		SET
+		MANAGER_COMPANY =
+		#{managerCompany},
+		MANAGER_NAME = #{managerName},
+		MANAGER_UPD_ID =
+		#{managerUpdId},
+		MANAGER_UPD_DT = current_timestamp()
+		WHERE
+		MANAGER_SEQ =
+		#{managerSeq}
+	</update>
+	<update id="deleteManager"
+		parameterType="com.risata181.sizai.bean.TblManager">
+		UPDATE
+		TBL_MANAGER
+		SET
+		MANAGER_IS_DELETE = 'Y',
+		MANAGER_UPD_ID = #{managerUpdId},
+		MANAGER_UPD_DT = current_timestamp()
+		WHERE
+		MANAGER_SEQ = #{managerSeq}
+	</update>
+	<select id="getManagerBySeq"
+		parameterType="com.risata181.sizai.bean.TblManager"
+		resultType="com.risata181.sizai.bean.TblManager">
+		SELECT
+		MANAGER_SEQ,
+		MANAGER_COMPANY,
+		MANAGER_NAME,
+		MANAGER_UPD_DT
+		FROM
+		TBL_MANAGER
+		WHERE
+		MANAGER_SEQ = #{managerSeq}
+		AND
+		MANAGER_IS_DELETE = 'N'
+	</select>
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblManager"
+		resultType="com.risata181.sizai.bean.TblManager">
+		SELECT *
+		FROM
+		TBL_MANAGER
+		WHERE
+		MANAGER_SEQ = #{managerSeq}
+		FOR
+		UPDATE
+	</select>
+	<select id="getPostCountByManager" parameterType="string"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		TBL_POST
+		WHERE
+		POST_IS_DELETE = 'N'
+		AND
+		POST_MANAGER = #{managerSeq}
+		OR
+		POST_COMPANY = #{managerSeq}
+	</select>
+	<select id="getOutgoingCountByCompany" parameterType="string"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		TBL_OUTGOING
+		WHERE
+		OUTGOING_IS_DELETE = 'N'
+		AND OUTGOING_COMPANY = #{managerSeq}
+	</select>
+
+</mapper>

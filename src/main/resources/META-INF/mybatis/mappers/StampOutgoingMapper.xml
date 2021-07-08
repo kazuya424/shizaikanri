@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.risata181.sizai.entity.StampOutgoingMapper">
+
+	<select id="getOutgoingList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblOutgoing">
+		SELECT
+		A.OUTGOING_SEQ,
+		date_format(a.OUTGOING_DATE,'%Y-%m-%d') AS
+		'outgoingDate',
+		A.OUTGOING_DESTINATION,
+		A.OUTGOING_MANAGER,
+		F.USER_NAME AS
+		'handler.USER_NAME',
+		G.USER_NAME AS
+		'inputuser.USER_NAME',
+		A.OUTGOING_TYPE,
+		C.STOCK_TYPE AS
+		'type.STOCK_TYPE',
+		C.STOCK_PRICE AS
+		'type.STOCK_PRICE',
+		A.OUTGOING_COUNT,
+		B.MANAGER_NAME AS
+		'manager.MANAGER_NAME',
+		B.MANAGER_COMPANY AS 'manager.MANAGER_COMPANY',
+		A.OUTGOING_COMMENT,
+		A.OUTGOING_CONTENT,
+		D.USER_NAME AS
+		'register.USER_NAME',
+		A.OUTGOING_REG_DT,
+		E.USER_NAME AS
+		'updater.USER_NAME',
+		A.OUTGOING_UPD_DT,
+		A.OUTGOING_IS_DELETE
+		FROM
+		TBL_OUTGOING A
+		LEFT JOIN
+		TBL_MANAGER B ON A.OUTGOING_COMPANY =
+		B.MANAGER_SEQ
+		LEFT JOIN TBL_STOCK
+		C ON A.OUTGOING_TYPE = C.STOCK_SEQ
+		LEFT JOIN TBL_USER D ON
+		A.OUTGOING_REG_ID = D.USER_SEQ
+		LEFT JOIN
+		TBL_USER E ON A.OUTGOING_UPD_ID
+		= E.USER_SEQ
+		LEFT JOIN TBL_USER F ON
+		A.OUTGOING_HANDLER = F.USER_SEQ
+		LEFT JOIN TBL_USER G ON
+		A.OUTGOING_INPUTUSER = G.USER_SEQ
+		WHERE
+		A.OUTGOING_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'outgoingDate'">
+						AND date_format(A.OUTGOING_DATE ,'%Y-%m-%d') =
+						str_to_date(#{search.searchValue}, '%Y-%m-%d')
+					</when>
+					<when test="search.searchKey == 'stockType'">
+						AND C.STOCK_TYPE LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'stockPrice'">
+						AND C.STOCK_PRICE LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'outgoingInputUser'">
+						AND F.USER_NAME LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'managerCompany'">
+						AND B.MANAGER_COMPANY LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'outgoingDestination'">
+						AND A.OUTGOING_DESTINATION LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'outgoingManager'">
+						AND A.OUTGOING_MANAGER LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'outgoingContent'">
+						AND A.OUTGOING_CONTENT LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'outgoingHandler'">
+						AND G.USER_NAME LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+					<when test="search.searchKey == 'outgoingComment'">
+						AND A.OUTGOING_COMMENT LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page}, ${listLength}
+	</select>
+
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblOutgoing"
+		resultType="com.risata181.sizai.bean.TblOutgoing">
+
+		SELECT *
+		FROM TBL_OUTGOING
+		WHERE OUTGOING_SEQ =
+		#{outgoingSeq}
+		FOR UPDATE
+	</select>
+
+	<select id="getOriginalOutgoing"
+		parameterType="com.risata181.sizai.bean.TblOutgoing"
+		resultType="com.risata181.sizai.bean.TblOutgoing">
+		SELECT
+		OUTGOING_COUNT,
+		OUTGOING_TYPE
+		FROM
+		TBL_OUTGOING
+		WHERE
+		OUTGOING_SEQ = ${outgoingSeq}
+	</select>
+
+	<select id="getOriginalStockByOutgoing"
+		parameterType="com.risata181.sizai.bean.TblOutgoing"
+		resultType="com.risata181.sizai.bean.TblStock">
+		SELECT
+		STOCK_COUNT
+		FROM
+		TBL_STOCK
+		WHERE
+		STOCK_SEQ =
+		#{outgoingType}
+		FOR UPDATE
+	</select>
+
+	<update id="updateStock"
+		parameterType="com.risata181.sizai.bean.TblStock">
+		UPDATE
+		TBL_STOCK
+
+		SET
+		STOCK_COUNT = #{stockCount},
+		STOCK_UPD_ID =#{stockUpdId},
+		STOCK_UPD_DT =
+		current_timestamp()
+		WHERE
+		STOCK_SEQ = #{stockSeq}
+	</update>
+
+
+	<update id="deleteOutgoing"
+		parameterType="com.risata181.sizai.bean.TblOutgoing">
+
+		UPDATE
+		TBL_OUTGOING
+		SET
+		OUTGOING_IS_DELETE = 'Y'
+		,
+		OUTGOING_UPD_ID = #{outgoingUpdId}
+		, OUTGOING_UPD_DT =
+		current_timestamp()
+		WHERE
+		OUTGOING_SEQ = #{outgoingSeq}
+	</update>
+
+	<update id="updateOutgoing"
+		parameterType="com.risata181.sizai.bean.TblOutgoing">
+		UPDATE
+		TBL_OUTGOING
+		SET
+		OUTGOING_DATE = #{outgoingDate},
+		OUTGOING_HANDLER =
+		#{outgoingHandler},
+		OUTGOING_INPUTUSER =
+		#{outgoingInputUser},
+		OUTGOING_TYPE = #{outgoingType}
+		, OUTGOING_COUNT =
+		#{outgoingCount}
+		, OUTGOING_COMMENT
+		= #{outgoingComment}
+		, OUTGOING_CONTENT = #{outgoingContent}
+		,
+		OUTGOING_UPD_ID = #{outgoingUpdId}
+		,
+		OUTGOING_DESTINATION =
+		#{outgoingDestination}
+		,OUTGOING_MANAGER =
+		#{outgoingManager}
+		, OUTGOING_COMPANY =
+		#{outgoingCompany}
+		,
+		OUTGOING_UPD_DT = current_timestamp()
+		WHERE
+		OUTGOING_SEQ =
+		#{outgoingSeq}
+	</update>
+
+	<insert id="insertOutgoing"
+		parameterType="com.risata181.sizai.bean.TblOutgoing">
+		INSERT INTO
+		tbl_outgoing(
+		OUTGOING_DATE,
+		OUTGOING_HANDLER,
+		OUTGOING_INPUTUSER,
+		OUTGOING_TYPE,
+		OUTGOING_DESTINATION,
+		OUTGOING_MANAGER,
+		OUTGOING_COUNT,
+		OUTGOING_COMPANY,
+		OUTGOING_CONTENT,
+		OUTGOING_COMMENT,
+		OUTGOING_REG_ID,
+		OUTGOING_REG_DT,
+		OUTGOING_UPD_ID,
+		OUTGOING_UPD_DT
+		)VALUES(
+		#{outgoingDate},
+		#{outgoingHandler},
+		#{outgoingInputUser},
+		#{outgoingType},
+		#{outgoingDestination},
+		#{outgoingManager},
+		#{outgoingCount},
+		#{outgoingCompany},
+		#{outgoingContent},
+		#{outgoingComment},
+		#{outgoingRegId},
+		current_timestamp(),
+		#{outgoingUpdId},
+		current_timestamp()
+		)
+	</insert>
+
+	<update id="updateAddToStockByOutgoing"
+		parameterType="com.risata181.sizai.bean.TblOutgoing">
+		UPDATE
+		tbl_stock
+		SET
+		STOCK_COUNT = (SELECT
+		(STOCK.STOCK_COUNT) - #{outgoingCount}
+		FROM (SELECT * FROM tbl_stock
+		WHERE stock_seq = #{outgoingType}) AS STOCK)
+		WHERE
+		STOCK_SEQ =
+		${outgoingType}
+	</update>
+
+	<select id="checkStock"
+		parameterType="com.risata181.sizai.bean.TblOutgoing"
+		resultType="com.risata181.sizai.bean.TblStock">
+		SELECT
+		STOCK_COUNT
+		FROM
+		tbl_stock
+		WHERE
+		STOCK_SEQ =
+		#{outgoingType}
+		FOR
+		UPDATE
+	</select>
+</mapper>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.StampMapper">
+	<select id="getInOutStockList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="java.util.HashMap">
+		SELECT
+		<choose>
+			<when test="sortField == 'seq'">
+				a.INSTOCK_SEQ AS 'seq',
+			</when>
+			<when test="sortField == 'stockDate'">
+				date_format(a.INSTOCK_DATE, '%Y-%m-%d') AS 'seq',
+			</when>
+			<when test="sortField == 'handler'">
+				a.INSTOCK_HANDLER AS 'seq',
+			</when>
+			<when test="sortField == 'inputUser'">
+				a.INSTOCK_INPUTUSER AS 'seq',
+			</when>
+			<when test="sortField == 'stockContent'">
+				NULL AS 'seq',
+			</when>
+			<when test="sortField == 'stockType'">
+				b.STOCK_PRICE AS 'seq',
+			</when>
+			<when test="sortField == 'stockCount'">
+				a.INSTOCK_COUNT AS 'seq',
+			</when>
+			<when test="sortField == 'stockComment'">
+				a.INSTOCK_COMMENT AS 'seq',
+			</when>
+		</choose>
+		a.INSTOCK_SEQ AS 'tblInstock.instockSeq'
+		, date_format(a.INSTOCK_DATE, '%Y-%m-%d') AS 'tblInstock.instockDate'
+		, c.USER_NAME AS 'tblInstock.handler.userName'
+		, d.USER_NAME AS 'tblInstock.inputUser.userName'
+		, b.STOCK_TYPE AS 'tblInstock.type.stockType'
+		, b.STOCK_PRICE AS 'tblInstock.type.stockPrice'
+		, a.INSTOCK_COUNT AS 'tblInstock.instockCount'
+		, a.INSTOCK_COMMENT AS 'tblInstock.instockComment'
+		, null AS 'tblOutgoing.outgoingSeq'
+		, null AS 'tblOutgoing.outgoingDate'
+		, null AS 'tblOutgoing.handler.userName'
+		, null AS 'tblOutgoing.inputUser.userName'
+		, null AS 'tblOutgoing.outgoingContent'
+		, null AS 'tblOutgoing.type.stockType'
+		, null AS 'tblOutgoing.type.stockPrice'
+		, null AS 'tblOutgoing.outgoingCount'
+		, null AS 'tblOutgoing.outgoingComment'
+		FROM
+		    TBL_INSTOCK a
+		    LEFT JOIN TBL_STOCK b
+		        ON a.INSTOCK_TYPE = b.STOCK_SEQ
+		    LEFT JOIN TBL_USER c
+		        ON a.INSTOCK_HANDLER = c.USER_SEQ
+		    LEFT JOIN TBL_USER d
+		        ON a.INSTOCK_INPUTUSER = d.USER_SEQ
+		WHERE
+		    a.INSTOCK_IS_DELETE = 'N'
+
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'stockDate'">
+						AND date_format(a.INSTOCK_DATE, '%Y-%m-%d') =
+						str_to_date(#{search.searchValue}, '%Y-%m-%d')
+					</when>
+					<when test="search.searchKey == 'user'">
+						AND a.INSTOCK_HANDLER = #{search.searchValue}
+					</when>
+					<when test="search.searchKey == 'handler'">
+						AND a.INSTOCK_INPUTUSER = #{search.searchValue}
+					</when>
+					<when test="search.searchKey == 'stock'">
+						AND b.STOCK_SEQ = #{search.searchValue}
+					</when>
+					<when test="search.searchKey == 'stockType'">
+						<if test="search.searchValue == 'outgoing'">
+							AND 1 = 0
+						</if>
+					</when>
+					<when test="search.searchKey == 'company'">
+						AND 1 = 0
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		UNION
+		SELECT
+		<choose>
+			<when test="sortField == 'seq'">
+				a.OUTGOING_SEQ AS 'seq',
+			</when>
+			<when test="sortField == 'stockDate'">
+				date_format(a.OUTGOING_DATE, '%Y-%m-%d') AS 'seq',
+			</when>
+			<when test="sortField == 'handler'">
+				a.OUTGOING_HANDLER AS 'seq',
+			</when>
+			<when test="sortField == 'inputUser'">
+				a.OUTGOING_INPUTUSER AS 'seq',
+			</when>
+			<when test="sortField == 'stockContent'">
+				a.OUTGOING_CONTENT AS 'seq',
+			</when>
+			<when test="sortField == 'stockType'">
+				c.STOCK_PRICE AS 'seq',
+			</when>
+			<when test="sortField == 'stockCount'">
+				a.OUTGOING_COUNT AS 'seq',
+			</when>
+			<when test="sortField == 'stockComment'">
+				a.OUTGOING_COMMENT AS 'seq',
+			</when>
+		</choose>
+		null AS 'tblInstock.instockSeq'
+		, null AS 'tblInstock.instockDate'
+		, null AS 'tblInstock.handler.userName'
+		, null AS 'tblInstock.inputUser.userName'
+		, null AS 'tblInstock.type.stockType'
+		, null AS 'tblInstock.type.stockPrice'
+		, null AS 'tblInstock.instockCount'
+		, null AS 'tblInstock.instockComment'
+		, a.OUTGOING_SEQ AS 'tblOutgoing.outgoingSeq'
+		, date_format(a.OUTGOING_DATE, '%Y-%m-%d') AS 'tblOutgoing.outgoingDate'
+		, d.USER_NAME AS 'tblOutgoing.handler.userName'
+		, e.USER_NAME AS 'tblOutgoing.inputUser.userName'
+		, a.OUTGOING_CONTENT AS 'tblOutgoing.outgoingContent'
+		, c.STOCK_TYPE AS 'tblOutgoing.type.stockType'
+		, c.STOCK_PRICE AS 'tblOutgoing.type.stockPrice'
+		, a.OUTGOING_COUNT AS 'tblOutgoing.outgoingCount'
+		, a.OUTGOING_COMMENT AS 'tblOutgoing.outgoingComment'
+		FROM
+		    TBL_OUTGOING a
+		    LEFT JOIN TBL_MANAGER b
+		        ON a.OUTGOING_COMPANY = b.MANAGER_SEQ
+		    LEFT JOIN TBL_STOCK c
+		        ON a.OUTGOING_TYPE = c.STOCK_SEQ
+		    LEFT JOIN TBL_USER d
+		        ON a.OUTGOING_HANDLER = d.USER_SEQ
+		    LEFT JOIN TBL_USER e
+		        ON a.OUTGOING_INPUTUSER = e.USER_SEQ
+		WHERE
+		    a.OUTGOING_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'stockDate'">
+						AND date_format(a.OUTGOING_DATE, '%Y-%m-%d') =
+						str_to_date(#{search.searchValue}, '%Y-%m-%d')
+					</when>
+					<when test="search.searchKey == 'user'">
+						AND a.OUTGOING_HANDLER = #{search.searchValue}
+					</when>
+					<when test="search.searchKey == 'handler'">
+						AND a.OUTGOING_INPUTUSER = #{search.searchValue}
+					</when>
+					<when test="search.searchKey == 'stock'">
+						AND c.STOCK_SEQ = #{search.searchValue}
+					</when>
+					<when test="search.searchKey == 'stockType'">
+						<if test="search.searchValue == 'instock'">
+							AND 1 = 0
+						</if>
+					</when>
+					<when test="search.searchKey == 'company'">
+						AND b.MANAGER_SEQ = #{search.searchValue}
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		    seq ${sortOrder}
+		LIMIT
+		    ${page}
+		    , ${listLength}
+	</select>
+</mapper>

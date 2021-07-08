@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.StampAnalyzeMapper">
+
+	<select id="getAnalyzeList"
+		parameterType="com.risata181.sizai.bean.TblOutgoing"
+		resultType="com.risata181.sizai.bean.TblOutgoing">
+		SELECT
+		t2.STOCK_TYPE as 'stockInfo.STOCK_TYPE',
+		t2.STOCK_PRICE as 'stockInfo.STOCK_PRICE',
+		SUM(t1.OUTGOING_COUNT) as 'OUTGOING_COUNT',
+		t2.STOCK_PRICE * SUM(t1.OUTGOING_COUNT) as 'PRICE_TIMES_COUNT'
+		FROM
+		TBL_OUTGOING t1
+		LEFT JOIN TBL_STOCK t2
+		ON t1.OUTGOING_TYPE = t2.STOCK_SEQ
+		LEFT JOIN TBL_MANAGER t3
+		ON t1.OUTGOING_COMPANY = t3.MANAGER_NAME
+		WHERE
+		t1.OUTGOING_IS_DELETE = 'N'
+		AND SUBSTRING(t1.OUTGOING_DATE,1,7) = #{outgoingDate}
+		AND t1.OUTGOING_COMPANY = #{outgoingCompany}
+		GROUP BY
+		t1.OUTGOING_TYPE
+		ORDER BY
+		t1.OUTGOING_TYPE DESC
+	</select>
+</mapper>

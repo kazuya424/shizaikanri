@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="Utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.AdminUserMapper">
+	<select id="getUserList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblUser">
+		SELECT
+		USER_SEQ,
+		USER_NAME,
+		USER_REG_DT,
+		USER_UPD_DT
+		FROM
+		TBL_USER
+		WHERE
+		USER_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'userName'">
+						AND USER_NAME LIKE '%${search.searchValue}%'
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page},${listLength}
+	</select>
+	<insert id="registUser"
+		parameterType="com.risata181.sizai.bean.TblUser">
+		INSERT INTO
+		TBL_USER
+		(
+		USER_ID,
+		USER_PW,
+		USER_NAME,
+		USER_AUTH,
+		USER_REG_ID,
+		USER_REG_DT,
+		USER_UPD_ID,
+		USER_UPD_DT
+		) VALUES (
+		#{userId},
+		#{userPw},
+		#{userName},
+		#{userAuth},
+		#{userRegId},
+		current_timestamp(),
+		#{userUpdId},
+		current_timestamp()
+		)
+	</insert>
+
+	<update id="updateUser"
+		parameterType="com.risata181.sizai.bean.TblManager">
+		UPDATE TBL_USER
+		SET
+		USER_ID = #{userId},
+		USER_PW =
+		#{userPw},
+		USER_AUTH = #{userAuth},
+		USER_NAME = #{userName},
+		USER_UPD_ID
+		= #{userUpdId},
+		USER_UPD_DT = current_timestamp()
+		WHERE
+		USER_SEQ =
+		#{userSeq}
+	</update>
+
+	<update id="deleteUser"
+		parameterType="com.risata181.sizai.bean.TblUser">
+		UPDATE
+		TBL_USER
+		SET
+		USER_IS_DELETE = 'Y',
+		USER_UPD_ID = #{userUpdId},
+		USER_UPD_DT = current_timestamp()
+		WHERE
+		USER_SEQ = #{userSeq}
+	</update>
+
+	<select id="getUserBySeq"
+		parameterType="com.risata181.sizai.bean.TblUser"
+		resultType="com.risata181.sizai.bean.TblUser">
+		SELECT
+		USER_ID,
+		USER_PW,
+		USER_NAME,
+		USER_AUTH,
+		USER_UPD_DT
+		FROM
+		TBL_USER
+		WHERE
+		USER_SEQ = #{userSeq}
+		AND
+		USER_IS_DELETE = 'N'
+	</select>
+
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblUser"
+		resultType="com.risata181.sizai.bean.TblUser">
+		SELECT *
+		FROM
+		TBL_USER
+		WHERE
+		USER_SEQ = #{userSeq}
+		FOR
+		UPDATE
+	</select>
+</mapper>

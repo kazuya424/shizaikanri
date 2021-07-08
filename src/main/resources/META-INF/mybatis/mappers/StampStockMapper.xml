@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.risata181.sizai.entity.StampStockMapper">
+
+	<select id="getStockList"
+		parameterType="com.risata181.sizai.bean.Combean"
+		resultType="com.risata181.sizai.bean.TblStock">
+		SELECT
+		a.STOCK_SEQ,
+		a.STOCK_TYPE,
+		a.STOCK_PRICE,
+		a.STOCK_COUNT,
+		a.STOCK_REG_ID,
+		b.USER_NAME AS 'register.USER_NAME',
+		a.STOCK_REG_DT,
+		a.STOCK_UPD_ID,
+		c.USER_NAME AS 'updater.USER_NAME',
+		a.STOCK_UPD_DT,
+		a.STOCK_IS_DELETE
+		FROM
+		TBL_STOCK a
+		LEFT JOIN TBL_USER b ON a.STOCK_REG_ID
+		= b.USER_SEQ
+		LEFT JOIN TBL_USER c ON a.STOCK_UPD_ID = c.USER_SEQ
+		WHERE
+		a.STOCK_IS_DELETE = 'N'
+		<foreach collection="searchObj" item="search">
+			<if test="search.searchValue != ''">
+				<choose>
+					<when test="search.searchKey == 'stockType'">
+						AND a.STOCK_TYPE LIKE
+						CONCAT('%',#{search.searchValue},'%')
+					</when>
+				</choose>
+			</if>
+		</foreach>
+		ORDER BY
+		${sortField} ${sortOrder}
+		LIMIT
+		${page}, ${listLength}
+	</select>
+
+	<select id="exclusiveCtrl"
+		parameterType="com.risata181.sizai.bean.TblStock"
+		resultType="com.risata181.sizai.bean.TblStock">
+		SELECT *
+		FROM TBL_STOCK
+		WHERE STOCK_SEQ = #{stockSeq}
+		FOR
+		UPDATE
+	</select>
+
+	<insert id="insertStock"
+		parameterType="com.risata181.sizai.bean.TblStock">
+		INSERT INTO
+		TBL_STOCK(
+		STOCK_TYPE
+		, STOCK_PRICE
+		,
+		STOCK_REG_ID
+		, STOCK_REG_DT
+		, STOCK_UPD_ID
+		, STOCK_UPD_DT
+		)VALUES(
+		#{stockType}
+		, #{stockPrice}
+		, #{stockRegId}
+		,current_timestamp()
+		,
+		#{stockUpdId}
+		,current_timestamp()
+		)
+	</insert>
+
+	<update id="updateStock"
+		parameterType="com.risata181.sizai.bean.TblStock">
+		UPDATE
+		TBL_STOCK
+		SET
+		STOCK_TYPE = #{stockType},
+		STOCK_PRICE
+		= #{stockPrice},
+		STOCK_UPD_ID = #{stockUpdId},
+		STOCK_UPD_DT =
+		current_timestamp()
+		WHERE
+		STOCK_SEQ = #{stockSeq}
+	</update>
+
+	<update id="deleteStock"
+		parameterType="com.risata181.sizai.bean.TblStock">
+		UPDATE
+		TBL_STOCK
+		SET
+		STOCK_IS_DELETE = 'Y',
+		STOCK_UPD_ID =
+		#{stockUpdId},
+		STOCK_UPD_DT = current_timestamp()
+		WHERE
+		STOCK_SEQ =
+		#{stockSeq}
+	</update>
+
+	<select id="getInstockOutgoingCount"
+		parameterType="com.risata181.sizai.bean.TblStock"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM
+		(
+		SELECT
+		INSTOCK_SEQ
+		FROM
+		TBL_INSTOCK
+		WHERE
+		INSTOCK_TYPE =
+		#{stockSeq}AND
+		INSTOCK_IS_DELETE =
+		'N'
+		UNION
+		SELECT
+		OUTGOING_SEQ
+		FROM
+		TBL_OUTGOING
+		WHERE
+		OUTGOING_TYPE =
+		#{stockSeq}AND
+		OUTGOING_IS_DELETE =
+		'N')AS work
+	</select>
+
+</mapper>
